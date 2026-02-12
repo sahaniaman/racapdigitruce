@@ -143,7 +143,7 @@ export function HostDetailContent({ hostId }: HostDetailContentProps) {
             Export
           </Button>
           <Button
-            className="bg-cyan text-black hover:bg-cyan/90"
+            className="bg-purple text-white hover:bg-purple/90"
             onClick={handleRescan}
             disabled={!hasPermission('canRescan') || isRescanning}
           >
@@ -239,7 +239,7 @@ export function HostDetailContent({ hostId }: HostDetailContentProps) {
             <CardContent className="space-y-4">
               {host.recentActivity.map((activity, index) => (
                 <div key={index} className="flex items-start gap-3">
-                  <div className="w-2 h-2 rounded-full bg-cyan mt-2" />
+                  <div className="w-2 h-2 rounded-full bg-purple mt-2" />
                   <div>
                     <p className="text-foreground font-medium">{activity.type}</p>
                     <p className="text-muted-foreground text-sm">{activity.timestamp}</p>
@@ -297,7 +297,7 @@ export function HostDetailContent({ hostId }: HostDetailContentProps) {
                           className="border-b border-border hover:bg-secondary/30"
                         >
                           <td className="py-4 px-2">
-                            <span className="text-cyan font-mono text-sm">
+                            <span className="text-purple font-mono text-sm">
                               {rule.ruleId}
                             </span>
                           </td>

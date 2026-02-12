@@ -127,7 +127,7 @@ export function DashboardContent() {
           <h1 className="text-3xl font-bold text-foreground">RACAP Dashboard</h1>
           <div className="mt-1 flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-green" />
-            <span className="text-sm text-cyan">Secured & Monitored by DigiTruce AI</span>
+            <span className="text-sm text-purple">Secured & Monitored by DigiTruce AI</span>
           </div>
         </div>
         <div className="text-right text-sm">

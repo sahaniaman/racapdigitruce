@@ -4,46 +4,51 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: #0a0a0f;
+  --background: #0a0a12;
   --foreground: #ffffff;
-  --card: #111118;
+  --card: #12121a;
   --card-foreground: #ffffff;
-  --popover: #111118;
+  --popover: #12121a;
   --popover-foreground: #ffffff;
-  --primary: #00d4d4;
-  --primary-foreground: #000000;
-  --secondary: #1a1a24;
-  --secondary-foreground: #ffffff;
-  --muted: #1a1a24;
-  --muted-foreground: #888899;
-  --accent: #00d4d4;
-  --accent-foreground: #000000;
+  --primary: #6D50E9;
+  --primary-foreground: #ffffff;
+  --secondary: #1a1a28;
+  --secondary-foreground: #A192D9;
+  --muted: #1a1a28;
+  --muted-foreground: #A192D9;
+  --accent: #6D50E9;
+  --accent-foreground: #ffffff;
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
-  --border: #2a2a3a;
-  --input: #1a1a24;
-  --ring: #00d4d4;
-  --chart-1: #00d4d4;
+  --border: #2d2d42;
+  --input: #1a1a28;
+  --ring: #6D50E9;
+  --chart-1: #6D50E9;
   --chart-2: #22c55e;
   --chart-3: #f59e0b;
   --chart-4: #ef4444;
-  --chart-5: #8b5cf6;
-  --radius: 0.5rem;
-  --sidebar: #0a0a0f;
+  --chart-5: #A192D9;
+  --radius: 0.625rem;
+  --sidebar: #0a0a12;
   --sidebar-foreground: #ffffff;
-  --sidebar-primary: #00d4d4;
-  --sidebar-primary-foreground: #000000;
-  --sidebar-accent: #1a1a24;
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: #2a2a3a;
-  --sidebar-ring: #00d4d4;
+  --sidebar-primary: #6D50E9;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #1a1a28;
+  --sidebar-accent-foreground: #A192D9;
+  --sidebar-border: #2d2d42;
+  --sidebar-ring: #6D50E9;
   
-  /* Custom colors for the app */
-  --cyan: #00d4d4;
+  /* Custom colors for the app - Digitruce Theme */
+  --digitruce-primary: #6D50E9;
+  --digitruce-secondary: #A192D9;
+  --digitruce-accent: #8B72F0;
+  --cyan: #6D50E9;
   --green: #22c55e;
   --orange: #f59e0b;
   --red: #ef4444;
   --yellow: #eab308;
+  --purple: #6D50E9;
+  --purple-light: #A192D9;
 }
 
 @theme inline {
@@ -86,12 +91,17 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
   
-  /* Custom colors */
+  /* Custom colors - Digitruce Theme */
   --color-cyan: var(--cyan);
   --color-green: var(--green);
   --color-orange: var(--orange);
   --color-red: var(--red);
   --color-yellow: var(--yellow);
+  --color-purple: var(--purple);
+  --color-purple-light: var(--purple-light);
+  --color-digitruce-primary: var(--digitruce-primary);
+  --color-digitruce-secondary: var(--digitruce-secondary);
+  --color-digitruce-accent: var(--digitruce-accent);
 }
 
 @layer base {

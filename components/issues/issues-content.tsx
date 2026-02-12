@@ -137,7 +137,7 @@ export function IssuesContent() {
             placeholder="Search by rule ID or description..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-lg border border-border bg-secondary py-2 pl-10 pr-4 text-sm placeholder:text-muted-foreground focus:border-cyan focus:outline-none focus:ring-1 focus:ring-cyan"
+            className="w-full rounded-lg border border-border bg-secondary py-2 pl-10 pr-4 text-sm placeholder:text-muted-foreground focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple"
           />
         </div>
 
@@ -219,7 +219,7 @@ export function IssuesContent() {
                 return (
                   <tr key={issue.id} className="border-b border-border hover:bg-secondary/30 transition-colors">
                     <td className="px-4 py-4">
-                      <span className="font-mono text-sm text-cyan">{issue.ruleId}</span>
+                      <span className="font-mono text-sm text-purple">{issue.ruleId}</span>
                     </td>
                     <td className="px-4 py-4">
                       <span className={cn('rounded px-2 py-1 text-xs font-medium', severityColors[issue.severity])}>

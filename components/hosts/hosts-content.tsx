@@ -115,7 +115,7 @@ export function HostsContent() {
             placeholder="Search by hostname, OS, or IP..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-lg border border-border bg-secondary py-2 pl-10 pr-4 text-sm placeholder:text-muted-foreground focus:border-cyan focus:outline-none focus:ring-1 focus:ring-cyan"
+            className="w-full rounded-lg border border-border bg-secondary py-2 pl-10 pr-4 text-sm placeholder:text-muted-foreground focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple"
           />
         </div>
 
@@ -238,7 +238,7 @@ function HostRow({
       <td className="px-4 py-3">
         <button
           onClick={onView}
-          className="font-medium text-cyan hover:underline cursor-pointer text-left"
+          className="font-medium text-purple hover:underline cursor-pointer text-left"
         >
           {host.hostname}
         </button>

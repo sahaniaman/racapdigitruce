@@ -74,7 +74,7 @@ export function AdminContent() {
         <p className="mt-1 text-muted-foreground">
           System configuration and compliance control management
         </p>
-        <span className="mt-2 inline-block rounded bg-cyan px-3 py-1 text-sm font-medium text-black">
+        <span className="mt-2 inline-block rounded bg-purple px-3 py-1 text-sm font-medium text-white">
           {currentUser.role}
         </span>
       </div>
@@ -160,7 +160,7 @@ export function AdminContent() {
                   {complianceRules.map((rule) => (
                     <tr key={rule.id} className="border-b border-border hover:bg-secondary/30 transition-colors">
                       <td className="px-4 py-4">
-                        <span className="font-mono text-sm text-cyan">{rule.ruleId}</span>
+                        <span className="font-mono text-sm text-purple">{rule.ruleId}</span>
                       </td>
                       <td className="px-4 py-4">
                         <span className={cn('rounded px-2 py-1 text-xs font-bold', frameworkColors[rule.framework])}>
@@ -180,7 +180,7 @@ export function AdminContent() {
                           checked={rule.locations.DEL}
                           onCheckedChange={() => toggleRuleLocation(rule.id, 'DEL')}
                           disabled={!canManageRules}
-                          className="data-[state=checked]:bg-cyan disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="data-[state=checked]:bg-purple disabled:opacity-50 disabled:cursor-not-allowed"
                         />
                       </td>
                       <td className="px-4 py-4 text-center">
@@ -188,7 +188,7 @@ export function AdminContent() {
                           checked={rule.locations.MUM}
                           onCheckedChange={() => toggleRuleLocation(rule.id, 'MUM')}
                           disabled={!canManageRules}
-                          className="data-[state=checked]:bg-cyan disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="data-[state=checked]:bg-purple disabled:opacity-50 disabled:cursor-not-allowed"
                         />
                       </td>
                       <td className="px-4 py-4 text-center">
@@ -196,7 +196,7 @@ export function AdminContent() {
                           checked={rule.locations.BLR}
                           onCheckedChange={() => toggleRuleLocation(rule.id, 'BLR')}
                           disabled={!canManageRules}
-                          className="data-[state=checked]:bg-cyan disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="data-[state=checked]:bg-purple disabled:opacity-50 disabled:cursor-not-allowed"
                         />
                       </td>
                       <td className="px-4 py-4 text-center">
@@ -204,7 +204,7 @@ export function AdminContent() {
                           checked={rule.locations.HYD}
                           onCheckedChange={() => toggleRuleLocation(rule.id, 'HYD')}
                           disabled={!canManageRules}
-                          className="data-[state=checked]:bg-cyan disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="data-[state=checked]:bg-purple disabled:opacity-50 disabled:cursor-not-allowed"
                         />
                       </td>
                     </tr>
@@ -228,7 +228,7 @@ export function AdminContent() {
               {canViewAuditLogs && (
                 <button
                   onClick={handleExportLogs}
-                  className="flex items-center gap-2 rounded-lg bg-cyan px-4 py-2 text-sm font-medium text-black hover:bg-cyan/90 transition-colors"
+                  className="flex items-center gap-2 rounded-lg bg-purple px-4 py-2 text-sm font-medium text-white hover:bg-purple/90 transition-colors"
                 >
                   <Download className="h-4 w-4" />
                   Export Logs
@@ -283,7 +283,7 @@ export function AdminContent() {
                             log.action.includes('Enabled') ? 'bg-green/20 text-green' :
                             log.action.includes('Disabled') ? 'bg-orange/20 text-orange' :
                             log.action.includes('Denied') ? 'bg-red/20 text-red' :
-                            'bg-cyan/20 text-cyan'
+                            'bg-purple/20 text-purple'
                           )}>
                             {log.action}
                           </span>
@@ -348,7 +348,7 @@ export function AdminContent() {
                 <Switch 
                   defaultChecked 
                   disabled={!canChangeSettings}
-                  className="data-[state=checked]:bg-cyan disabled:opacity-50 disabled:cursor-not-allowed" 
+                  className="data-[state=checked]:bg-purple disabled:opacity-50 disabled:cursor-not-allowed" 
                 />
               </div>
 
@@ -359,7 +359,7 @@ export function AdminContent() {
                 </div>
                 <Switch 
                   disabled={!canChangeSettings}
-                  className="data-[state=checked]:bg-cyan disabled:opacity-50 disabled:cursor-not-allowed" 
+                  className="data-[state=checked]:bg-purple disabled:opacity-50 disabled:cursor-not-allowed" 
                 />
               </div>
 
@@ -388,7 +388,7 @@ export function AdminContent() {
                 <Switch 
                   defaultChecked 
                   disabled={!canChangeSettings}
-                  className="data-[state=checked]:bg-cyan disabled:opacity-50 disabled:cursor-not-allowed" 
+                  className="data-[state=checked]:bg-purple disabled:opacity-50 disabled:cursor-not-allowed" 
                 />
               </div>
             </div>

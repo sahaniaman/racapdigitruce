@@ -246,6 +246,134 @@ export const manualReportsStorage = {
   }
 }
 
+// Compliance Snapshots Storage for Report Comparison
+export interface ComplianceSnapshot {
+  id: string
+  date: string
+  timestamp: number
+  location: string
+  metrics: {
+    systemCompliance: number
+    totalEndpoints: number
+    totalControls: number
+    criticalFailed: number
+    highFailed: number
+    mediumFailed: number
+    lowFailed: number
+  }
+  severityData: {
+    severity: string
+    passed: number
+    failed: number
+  }[]
+  categoryData: {
+    category: string
+    total: number
+    passed: number
+    failed: number
+  }[]
+}
+
+const COMPLIANCE_SNAPSHOTS_KEY = 'racap_compliance_snapshots'
+
+export const complianceSnapshotStorage = {
+  save: (snapshot: Omit<ComplianceSnapshot, 'id' | 'timestamp'>): boolean => {
+    const snapshots = complianceSnapshotStorage.getAll()
+    const newSnapshot: ComplianceSnapshot = {
+      ...snapshot,
+      id: `snapshot_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      timestamp: Date.now(),
+    }
+    snapshots.unshift(newSnapshot)
+    
+    // Keep only last 100 snapshots
+    const trimmedSnapshots = snapshots.slice(0, 100)
+    return storage.setItem(COMPLIANCE_SNAPSHOTS_KEY, trimmedSnapshots)
+  },
+
+  getAll: (): ComplianceSnapshot[] => {
+    return storage.getItem<ComplianceSnapshot[]>(COMPLIANCE_SNAPSHOTS_KEY, [])
+  },
+
+  getByDate: (date: string): ComplianceSnapshot | null => {
+    const snapshots = complianceSnapshotStorage.getAll()
+    return snapshots.find(s => s.date === date) || null
+  },
+
+  getByDateRange: (startDate: string, endDate: string): ComplianceSnapshot[] => {
+    const snapshots = complianceSnapshotStorage.getAll()
+    const start = new Date(startDate).getTime()
+    const end = new Date(endDate).getTime()
+    return snapshots.filter(s => {
+      const snapshotTime = s.timestamp
+      return snapshotTime >= start && snapshotTime <= end
+    })
+  },
+
+  getRecent: (count: number = 10): ComplianceSnapshot[] => {
+    const snapshots = complianceSnapshotStorage.getAll()
+    return snapshots.slice(0, count)
+  },
+
+  compare: (snapshot1Id: string, snapshot2Id: string): {
+    snapshot1: ComplianceSnapshot | null
+    snapshot2: ComplianceSnapshot | null
+    comparison: {
+      complianceChange: number
+      endpointsChange: number
+      controlsChange: number
+      criticalChange: number
+      highChange: number
+      mediumChange: number
+      lowChange: number
+      overallTrend: 'improving' | 'worsening' | 'stable'
+    } | null
+  } => {
+    const snapshots = complianceSnapshotStorage.getAll()
+    const snapshot1 = snapshots.find(s => s.id === snapshot1Id) || null
+    const snapshot2 = snapshots.find(s => s.id === snapshot2Id) || null
+
+    if (!snapshot1 || !snapshot2) {
+      return { snapshot1, snapshot2, comparison: null }
+    }
+
+    // Ensure snapshot1 is older (for consistent comparison direction)
+    const [older, newer] = snapshot1.timestamp < snapshot2.timestamp 
+      ? [snapshot1, snapshot2] 
+      : [snapshot2, snapshot1]
+
+    const complianceChange = newer.metrics.systemCompliance - older.metrics.systemCompliance
+    const criticalChange = newer.metrics.criticalFailed - older.metrics.criticalFailed
+    const highChange = newer.metrics.highFailed - older.metrics.highFailed
+
+    // Determine overall trend
+    let overallTrend: 'improving' | 'worsening' | 'stable' = 'stable'
+    if (complianceChange > 1) overallTrend = 'improving'
+    else if (complianceChange < -1) overallTrend = 'worsening'
+    else if (criticalChange < 0 || highChange < 0) overallTrend = 'improving'
+    else if (criticalChange > 0 || highChange > 0) overallTrend = 'worsening'
+
+    return {
+      snapshot1: older,
+      snapshot2: newer,
+      comparison: {
+        complianceChange,
+        endpointsChange: newer.metrics.totalEndpoints - older.metrics.totalEndpoints,
+        controlsChange: newer.metrics.totalControls - older.metrics.totalControls,
+        criticalChange,
+        highChange,
+        mediumChange: newer.metrics.mediumFailed - older.metrics.mediumFailed,
+        lowChange: newer.metrics.lowFailed - older.metrics.lowFailed,
+        overallTrend,
+      }
+    }
+  },
+
+  clear: (): boolean => {
+    return storage.removeItem(COMPLIANCE_SNAPSHOTS_KEY)
+  }
+}
+
 // Utility: Check localStorage availability and space
 export const checkStorageHealth = () => {
   if (!isBrowser) {

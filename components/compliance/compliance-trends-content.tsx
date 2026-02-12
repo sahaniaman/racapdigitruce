@@ -55,7 +55,7 @@ export function ComplianceTrendsContent() {
         <div>
           <h1 className="text-3xl font-bold text-foreground">Compliance Trends</h1>
           <p className="text-muted-foreground">Historical compliance data and trend analysis</p>
-          <p className="text-sm text-cyan mt-1">
+          <p className="text-sm text-purple mt-1">
             Viewing data for: {selectedLocation}
           </p>
         </div>
@@ -109,7 +109,7 @@ export function ComplianceTrendsContent() {
         <Card className="bg-card border-border">
           <CardContent className="p-4">
             <p className="text-muted-foreground text-sm">Current Score</p>
-            <p className="text-3xl font-bold text-cyan">{currentScore}%</p>
+            <p className="text-3xl font-bold text-purple">{currentScore}%</p>
           </CardContent>
         </Card>
         <Card className="bg-card border-border">

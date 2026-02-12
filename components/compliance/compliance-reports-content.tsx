@@ -26,7 +26,17 @@ const pieData = [
   { name: 'Compliant', value: 78.5, color: '#22c55e' },
   { name: 'Non-Compliant', value: 10.9, color: '#ef4444' },
   { name: 'Not Applicable', value: 6.4, color: '#f59e0b' },
-  { name: 'Unknown', value: 4.1, color: '#888899' },
+  { name: 'Unknown', value: 4.1, color: '#A192D9' },
+]
+
+// Category compliance data
+const categoryData = [
+  { category: 'Authentication', total: 124, passed: 98, failed: 26 },
+  { category: 'Network Security', total: 156, passed: 132, failed: 24 },
+  { category: 'Data Protection', total: 98, passed: 71, failed: 27 },
+  { category: 'Access Control', total: 142, passed: 118, failed: 24 },
+  { category: 'Patch Management', total: 168, passed: 125, failed: 43 },
+  { category: 'Configuration', total: 168, passed: 139, failed: 29 },
 ]
 
 export function ComplianceReportsContent() {
@@ -39,80 +49,22 @@ export function ComplianceReportsContent() {
       return
     }
 
-    // Calculate total failed policies from severity data
-    const totalFailedPolicies = complianceAnalytics.severityData.reduce((sum, item) => sum + item.failed, 0)
-
-    // Generate comprehensive compliance report
+    // Generate comprehensive compliance report matching the attached format
     const pdfData: PDFReportData = {
       title: 'Overall Compliance Summary Report',
-      subtitle: 'RACAP Compliance & Analytics - DigiTruce Security Platform',
       date: new Date().toLocaleString('en-IN'),
-      metadata: {
-        'Location': selectedLocation,
-        'System Compliance': `${complianceAnalytics.systemCompliance}%`,
-        'Total Endpoints': complianceAnalytics.totalEndpoints.toString(),
-        'Total Policies': complianceAnalytics.totalPolicies.toString(),
-        'Failed Policies': totalFailedPolicies.toString(),
-        'Report Type': 'Overall Summary'
+      summaryMetrics: {
+        systemCompliance: complianceAnalytics.systemCompliance,
+        totalEndpoints: complianceAnalytics.totalEndpoints,
+        totalControls: complianceAnalytics.totalControls,
       },
-      sections: [
-        {
-          title: 'Executive Summary',
-          content: [
-            `This report provides a comprehensive overview of the compliance status for ${selectedLocation}.`,
-            `System Compliance Score: ${complianceAnalytics.systemCompliance}%`,
-            `Compliance Improvement: +${complianceAnalytics.complianceChange}% from previous period`,
-            `Total Endpoints Monitored: ${complianceAnalytics.totalEndpoints}`,
-            `Total Policies Evaluated: ${complianceAnalytics.totalPolicies}`,
-            `Failed Policies: ${totalFailedPolicies}`
-          ]
-        },
-        {
-          title: 'Compliance Distribution',
-          content: [
-            `Compliant Systems: ${pieData[0].value}%`,
-            `Non-Compliant Systems: ${pieData[1].value}%`,
-            `Not Applicable: ${pieData[2].value}%`,
-            `Unknown Status: ${pieData[3].value}%`
-          ]
-        },
-        {
-          title: 'Key Performance Indicators',
-          type: 'table',
-          content: [
-            {
-              'Metric': 'System Compliance',
-              'Value': `${complianceAnalytics.systemCompliance}%`,
-              'Change': `+${complianceAnalytics.complianceChange}%`,
-              'Status': 'Improving'
-            },
-            {
-              'Metric': 'Total Endpoints',
-              'Value': complianceAnalytics.totalEndpoints.toString(),
-              'Change': '-',
-              'Status': 'Stable'
-            },
-            {
-              'Metric': 'Failed Policies',
-              'Value': totalFailedPolicies.toString(),
-              'Change': '-',
-              'Status': 'Needs Attention'
-            }
-          ]
-        },
-        {
-          title: 'Recommendations',
-          type: 'list',
-          content: [
-            'Focus on addressing the non-compliant systems identified in this report',
-            'Review and update policies that are marked as "Not Applicable"',
-            'Investigate systems with unknown compliance status',
-            'Schedule regular compliance assessments for continuous improvement',
-            'Implement automated remediation for common compliance failures',
-            'Conduct training sessions for administrators on compliance best practices'
-          ]
-        }
-      ]
+      severityData: complianceAnalytics.severityData.map(item => ({
+        severity: item.severity,
+        passed: item.passed,
+        failed: item.failed,
+      })),
+      categoryData: categoryData,
+      sections: [],
     }
 
     // Export to PDF
@@ -136,37 +88,37 @@ export function ComplianceReportsContent() {
         <TabsList className="bg-secondary border border-border">
           <TabsTrigger
             value="overall"
-            className="data-[state=active]:bg-cyan data-[state=active]:text-black"
+            className="data-[state=active]:bg-purple data-[state=active]:text-white"
           >
             Overall Summary
           </TabsTrigger>
           <TabsTrigger
             value="endpoints"
-            className="data-[state=active]:bg-cyan data-[state=active]:text-black"
+            className="data-[state=active]:bg-purple data-[state=active]:text-white"
           >
             Endpoints
           </TabsTrigger>
           <TabsTrigger
             value="failed"
-            className="data-[state=active]:bg-cyan data-[state=active]:text-black"
+            className="data-[state=active]:bg-purple data-[state=active]:text-white"
           >
             Failed Controls
           </TabsTrigger>
           <TabsTrigger
             value="analysis"
-            className="data-[state=active]:bg-cyan data-[state=active]:text-black"
+            className="data-[state=active]:bg-purple data-[state=active]:text-white"
           >
             Control Analysis
           </TabsTrigger>
           <TabsTrigger
             value="trends"
-            className="data-[state=active]:bg-cyan data-[state=active]:text-black"
+            className="data-[state=active]:bg-purple data-[state=active]:text-white"
           >
             Trends
           </TabsTrigger>
           <TabsTrigger
             value="inventory"
-            className="data-[state=active]:bg-cyan data-[state=active]:text-black"
+            className="data-[state=active]:bg-purple data-[state=active]:text-white"
           >
             Inventory
           </TabsTrigger>
@@ -187,7 +139,7 @@ export function ComplianceReportsContent() {
                 </div>
                 <Button
                   variant="outline"
-                  className="border-cyan text-cyan hover:bg-cyan hover:text-black bg-transparent"
+                  className="border-purple text-purple hover:bg-purple hover:text-white bg-transparent"
                   onClick={handleExportPDF}
                   disabled={!hasPermission('canExport')}
                 >
@@ -202,7 +154,7 @@ export function ComplianceReportsContent() {
                   <CardContent className="p-4">
                     <p className="text-muted-foreground text-sm">System Compliance</p>
                     <div className="flex items-baseline gap-2">
-                      <span className="text-3xl font-bold text-cyan">
+                      <span className="text-3xl font-bold text-purple">
                         {complianceAnalytics.systemCompliance}%
                       </span>
                       <span className="text-green text-sm flex items-center">
@@ -360,7 +312,7 @@ export function ComplianceReportsContent() {
                     className="flex items-center justify-between p-4 bg-secondary/50 rounded-lg"
                   >
                     <div className="flex items-center gap-4">
-                      <span className="text-cyan font-mono">{item.rule}</span>
+                      <span className="text-purple font-mono">{item.rule}</span>
                       <span className="text-foreground">{item.desc}</span>
                     </div>
                     <div className="flex items-center gap-4">

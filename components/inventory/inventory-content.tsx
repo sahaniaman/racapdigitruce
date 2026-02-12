@@ -126,7 +126,7 @@ export function InventoryContent() {
           <p className="mt-1 text-muted-foreground">
             Complete inventory of all managed assets
           </p>
-          <p className="text-sm text-cyan">
+          <p className="text-sm text-purple">
             Viewing data for: {selectedLocation}
           </p>
         </div>
@@ -187,7 +187,7 @@ export function InventoryContent() {
               placeholder="Search hostname, asset ID, owner..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-lg border border-border bg-secondary py-2 pl-10 pr-4 text-sm placeholder:text-muted-foreground focus:border-cyan focus:outline-none focus:ring-1 focus:ring-cyan"
+              className="w-full rounded-lg border border-border bg-secondary py-2 pl-10 pr-4 text-sm placeholder:text-muted-foreground focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple"
             />
           </div>
 
@@ -294,7 +294,7 @@ function AssetRow({ asset }: { asset: Asset }) {
   return (
     <tr className="border-b border-border hover:bg-secondary/30 transition-colors">
       <td className="px-4 py-3">
-        <span className="font-mono text-sm text-cyan">{asset.assetId}</span>
+        <span className="font-mono text-sm text-purple">{asset.assetId}</span>
       </td>
       <td className="px-4 py-3 text-sm text-foreground">{asset.hostname}</td>
       <td className="px-4 py-3">

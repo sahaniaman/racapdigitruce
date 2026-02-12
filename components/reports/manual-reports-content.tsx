@@ -130,12 +130,12 @@ export function ManualReportsContent() {
           <p className="text-muted-foreground">
             Upload and manage manual compliance and audit reports
           </p>
-          <p className="text-sm text-cyan mt-1">
+          <p className="text-sm text-purple mt-1">
             Viewing data for: {selectedLocation}
           </p>
         </div>
         <Button
-          className="bg-cyan text-black hover:bg-cyan/90"
+          className="bg-purple text-white hover:bg-purple/90"
           onClick={() => setShowUploadForm(true)}
           disabled={!hasPermission('canGenerateReports')}
         >
@@ -226,7 +226,7 @@ export function ManualReportsContent() {
                 Cancel
               </Button>
               <Button
-                className="bg-cyan text-black hover:bg-cyan/90"
+                className="bg-purple text-white hover:bg-purple/90"
                 onClick={handleUpload}
               >
                 Upload Report
@@ -249,8 +249,8 @@ export function ManualReportsContent() {
                 className="flex items-center justify-between p-4 bg-secondary/50 rounded-lg hover:bg-secondary transition-colors"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-cyan/10 rounded-lg flex items-center justify-center">
-                    <FileText className="h-6 w-6 text-cyan" />
+                  <div className="w-12 h-12 bg-purple/10 rounded-lg flex items-center justify-center">
+                    <FileText className="h-6 w-6 text-purple" />
                   </div>
                   <div>
                     <h3 className="font-medium text-foreground">{report.title}</h3>

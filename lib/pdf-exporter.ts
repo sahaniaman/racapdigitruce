@@ -12,6 +12,37 @@ export interface PDFReportData {
     location?: string
     [key: string]: any
   }
+  // New fields for compliance summary
+  summaryMetrics?: {
+    systemCompliance: number
+    totalEndpoints: number
+    totalControls: number
+  }
+  severityData?: {
+    severity: string
+    passed: number
+    failed: number
+  }[]
+  categoryData?: {
+    category: string
+    total: number
+    passed: number
+    failed: number
+  }[]
+  // Comparison data
+  comparisonData?: {
+    previousDate: string
+    currentDate: string
+    previousCompliance: number
+    currentCompliance: number
+    changes: {
+      metric: string
+      previous: number | string
+      current: number | string
+      change: number | string
+      trend: 'up' | 'down' | 'stable'
+    }[]
+  } | null
 }
 
 export interface PDFSection {
@@ -21,6 +52,22 @@ export interface PDFSection {
 }
 
 export class PDFExporter {
+  // Digitruce theme colors
+  private static readonly COLORS = {
+    primary: '#3498DB',
+    primaryDark: '#2980B9',
+    secondary: '#A192D9',
+    success: '#22c55e',
+    danger: '#ef4444',
+    warning: '#f59e0b',
+    text: '#1a1a1a',
+    textMuted: '#64748b',
+    background: '#ffffff',
+    border: '#e2e8f0',
+    tableHeader: '#3498DB',
+    tableHeaderText: '#ffffff',
+  }
+
   private static readonly styles = `
     <style>
       @media print {
@@ -29,91 +76,170 @@ export class PDFExporter {
         .no-print { display: none; }
       }
       
+      * {
+        box-sizing: border-box;
+      }
+      
       body {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+        font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', 'Helvetica Neue', sans-serif;
         line-height: 1.6;
-        color: #1a1a1a;
+        color: ${this.COLORS.text};
         max-width: 210mm;
         margin: 0 auto;
-        padding: 20mm;
-        background: white;
+        padding: 25mm 20mm;
+        background: ${this.COLORS.background};
+      }
+      
+      .report-header {
+        margin-bottom: 24px;
       }
       
       h1 {
-        color: #06b6d4;
-        font-size: 28px;
-        margin-bottom: 8px;
-        border-bottom: 3px solid #06b6d4;
-        padding-bottom: 10px;
+        color: ${this.COLORS.text};
+        font-size: 32px;
+        font-weight: 300;
+        margin: 0 0 8px 0;
+        letter-spacing: -0.5px;
+      }
+      
+      .generated-date {
+        color: ${this.COLORS.textMuted};
+        font-size: 14px;
+        margin-bottom: 24px;
+      }
+      
+      .summary-metrics {
+        margin: 24px 0;
+      }
+      
+      .summary-metric {
+        margin: 8px 0;
+        font-size: 16px;
+        color: ${this.COLORS.text};
+      }
+      
+      .summary-metric strong {
+        font-weight: 600;
       }
       
       h2 {
-        color: #0891b2;
-        font-size: 20px;
-        margin-top: 24px;
-        margin-bottom: 12px;
-        border-bottom: 2px solid #e5e7eb;
-        padding-bottom: 6px;
+        color: ${this.COLORS.text};
+        font-size: 18px;
+        font-weight: 600;
+        margin-top: 32px;
+        margin-bottom: 16px;
       }
       
       h3 {
-        color: #334155;
+        color: ${this.COLORS.text};
         font-size: 16px;
         margin-top: 16px;
         margin-bottom: 8px;
       }
       
-      .metadata {
-        background: #f8fafc;
-        border-left: 4px solid #06b6d4;
-        padding: 12px 16px;
-        margin: 16px 0;
-        font-size: 14px;
-      }
-      
-      .metadata-item {
-        display: flex;
-        justify-content: space-between;
-        margin: 4px 0;
-      }
-      
-      .metadata-label {
-        font-weight: 600;
-        color: #64748b;
-      }
-      
+      /* Modern Table Styles */
       table {
         width: 100%;
         border-collapse: collapse;
-        margin: 16px 0;
+        margin: 16px 0 32px 0;
         font-size: 14px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
       }
       
       th {
-        background: #f1f5f9;
-        color: #334155;
+        background: ${this.COLORS.tableHeader};
+        color: ${this.COLORS.tableHeaderText};
         font-weight: 600;
         text-align: left;
-        padding: 12px;
-        border: 1px solid #e2e8f0;
+        padding: 14px 16px;
+        border: none;
+      }
+      
+      th:first-child {
+        border-radius: 4px 0 0 0;
+      }
+      
+      th:last-child {
+        border-radius: 0 4px 0 0;
       }
       
       td {
-        padding: 10px 12px;
-        border: 1px solid #e2e8f0;
+        padding: 12px 16px;
+        border-bottom: 1px solid ${this.COLORS.border};
+        color: ${this.COLORS.text};
+      }
+      
+      tr:last-child td {
+        border-bottom: none;
       }
       
       tr:nth-child(even) {
         background: #f8fafc;
       }
       
+      tr:hover {
+        background: #f1f5f9;
+      }
+      
+      /* Comparison Section Styles */
+      .comparison-section {
+        background: linear-gradient(135deg, #f8f9fc 0%, #f1f5f9 100%);
+        border-radius: 8px;
+        padding: 20px;
+        margin: 24px 0;
+        border: 1px solid ${this.COLORS.border};
+      }
+      
+      .comparison-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid ${this.COLORS.border};
+      }
+      
+      .comparison-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: ${this.COLORS.text};
+        margin: 0;
+      }
+      
+      .comparison-dates {
+        font-size: 13px;
+        color: ${this.COLORS.textMuted};
+      }
+      
+      .change-positive {
+        color: ${this.COLORS.success};
+        font-weight: 600;
+      }
+      
+      .change-negative {
+        color: ${this.COLORS.danger};
+        font-weight: 600;
+      }
+      
+      .change-neutral {
+        color: ${this.COLORS.warning};
+        font-weight: 600;
+      }
+      
+      .trend-arrow {
+        font-size: 12px;
+        margin-right: 4px;
+      }
+      
+      /* List Styles */
       ul, ol {
         margin: 12px 0;
         padding-left: 24px;
       }
       
       li {
-        margin: 6px 0;
+        margin: 8px 0;
+        color: ${this.COLORS.text};
       }
       
       .section {
@@ -121,17 +247,17 @@ export class PDFExporter {
       }
       
       .footer {
-        margin-top: 40px;
+        margin-top: 48px;
         padding-top: 16px;
-        border-top: 2px solid #e5e7eb;
+        border-top: 1px solid ${this.COLORS.border};
         font-size: 12px;
-        color: #64748b;
+        color: ${this.COLORS.textMuted};
         text-align: center;
       }
       
       .badge {
         display: inline-block;
-        padding: 4px 8px;
+        padding: 4px 10px;
         border-radius: 4px;
         font-size: 12px;
         font-weight: 600;
@@ -144,17 +270,24 @@ export class PDFExporter {
       
       pre {
         background: #f8fafc;
-        border: 1px solid #e2e8f0;
+        border: 1px solid ${this.COLORS.border};
         border-radius: 4px;
         padding: 12px;
         overflow-x: auto;
         font-size: 13px;
       }
+      
+      /* Overall compliance highlight */
+      .compliance-highlight {
+        font-size: 24px;
+        font-weight: 600;
+        color: ${this.COLORS.primary};
+      }
     </style>
   `
 
   static generateHTML(data: PDFReportData): string {
-    const { title, subtitle, date, sections, metadata } = data
+    const { title, subtitle, date, sections, metadata, summaryMetrics, severityData, categoryData, comparisonData } = data
 
     let html = `
 <!DOCTYPE html>
@@ -167,23 +300,94 @@ export class PDFExporter {
 </head>
 <body>
   <div class="report">
-    <h1>${title}</h1>
-    ${subtitle ? `<p style="font-size: 18px; color: #64748b; margin-top: -4px;">${subtitle}</p>` : ''}
-    
-    <div class="metadata">
-      <div class="metadata-item">
-        <span class="metadata-label">Generated:</span>
-        <span>${date}</span>
-      </div>
-      ${metadata ? Object.entries(metadata).map(([key, value]) => `
-        <div class="metadata-item">
-          <span class="metadata-label">${this.formatLabel(key)}:</span>
-          <span>${value}</span>
-        </div>
-      `).join('') : ''}
+    <div class="report-header">
+      <h1>${title}</h1>
+      <p class="generated-date">Generated: ${date}</p>
     </div>
 `
 
+    // Render summary metrics if provided (matching the attached format)
+    if (summaryMetrics) {
+      html += `
+    <div class="summary-metrics">
+      <p class="summary-metric">System-Wide Compliance: <strong class="compliance-highlight">${summaryMetrics.systemCompliance}%</strong></p>
+      <p class="summary-metric">Total Endpoints: <strong>${summaryMetrics.totalEndpoints}</strong></p>
+      <p class="summary-metric">Total Controls: <strong>${summaryMetrics.totalControls}</strong></p>
+    </div>
+`
+    }
+
+    // Render severity data table (matching attached format)
+    if (severityData && severityData.length > 0) {
+      html += `
+    <table>
+      <thead>
+        <tr>
+          <th>Severity</th>
+          <th>Passed</th>
+          <th>Failed</th>
+          <th>Compliance %</th>
+        </tr>
+      </thead>
+      <tbody>
+`
+      severityData.forEach(item => {
+        const total = item.passed + item.failed
+        const compliance = total > 0 ? ((item.passed / total) * 100).toFixed(1) : '0.0'
+        html += `
+        <tr>
+          <td>${item.severity}</td>
+          <td>${item.passed}</td>
+          <td>${item.failed}</td>
+          <td>${compliance}%</td>
+        </tr>
+`
+      })
+      html += `
+      </tbody>
+    </table>
+`
+    }
+
+    // Render category data table (matching attached format)
+    if (categoryData && categoryData.length > 0) {
+      html += `
+    <table>
+      <thead>
+        <tr>
+          <th>Category</th>
+          <th>Total</th>
+          <th>Passed</th>
+          <th>Failed</th>
+          <th>Compliance %</th>
+        </tr>
+      </thead>
+      <tbody>
+`
+      categoryData.forEach(item => {
+        const compliance = item.total > 0 ? ((item.passed / item.total) * 100).toFixed(1) : '0.0'
+        html += `
+        <tr>
+          <td>${item.category}</td>
+          <td>${item.total}</td>
+          <td>${item.passed}</td>
+          <td>${item.failed}</td>
+          <td>${compliance}%</td>
+        </tr>
+`
+      })
+      html += `
+      </tbody>
+    </table>
+`
+    }
+
+    // Render comparison section if available
+    if (comparisonData) {
+      html += this.renderComparisonSection(comparisonData)
+    }
+
+    // Render other sections
     sections.forEach(section => {
       html += this.renderSection(section)
     })
@@ -206,6 +410,67 @@ export class PDFExporter {
   </script>
 </body>
 </html>
+`
+    return html
+  }
+
+  private static renderComparisonSection(comparisonData: NonNullable<PDFReportData['comparisonData']>): string {
+    const complianceChange = comparisonData.currentCompliance - comparisonData.previousCompliance
+    const changeClass = complianceChange > 0 ? 'change-positive' : complianceChange < 0 ? 'change-negative' : 'change-neutral'
+    const changeSymbol = complianceChange > 0 ? '↑' : complianceChange < 0 ? '↓' : '→'
+
+    let html = `
+    <div class="comparison-section">
+      <div class="comparison-header">
+        <h3 class="comparison-title">Compliance Comparison Report</h3>
+        <span class="comparison-dates">${comparisonData.previousDate} vs ${comparisonData.currentDate}</span>
+      </div>
+      
+      <div style="display: flex; justify-content: space-around; margin-bottom: 16px;">
+        <div style="text-align: center;">
+          <p style="color: #64748b; font-size: 14px; margin: 0;">Previous</p>
+          <p style="font-size: 28px; font-weight: 600; color: #64748b; margin: 4px 0;">${comparisonData.previousCompliance}%</p>
+        </div>
+        <div style="text-align: center;">
+          <p style="color: #64748b; font-size: 14px; margin: 0;">Change</p>
+          <p class="${changeClass}" style="font-size: 28px; margin: 4px 0;">
+            <span class="trend-arrow">${changeSymbol}</span>${Math.abs(complianceChange).toFixed(1)}%
+          </p>
+        </div>
+        <div style="text-align: center;">
+          <p style="color: #64748b; font-size: 14px; margin: 0;">Current</p>
+          <p style="font-size: 28px; font-weight: 600; color: #6D50E9; margin: 4px 0;">${comparisonData.currentCompliance}%</p>
+        </div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>Previous</th>
+            <th>Current</th>
+            <th>Change</th>
+          </tr>
+        </thead>
+        <tbody>
+`
+    comparisonData.changes.forEach(change => {
+      const trendClass = change.trend === 'up' ? 'change-positive' : change.trend === 'down' ? 'change-negative' : 'change-neutral'
+      const trendSymbol = change.trend === 'up' ? '↑' : change.trend === 'down' ? '↓' : '→'
+      html += `
+          <tr>
+            <td>${change.metric}</td>
+            <td>${change.previous}</td>
+            <td>${change.current}</td>
+            <td class="${trendClass}"><span class="trend-arrow">${trendSymbol}</span>${change.change}</td>
+          </tr>
+`
+    })
+
+    html += `
+        </tbody>
+      </table>
+    </div>
 `
     return html
   }

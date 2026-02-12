@@ -15,7 +15,7 @@ import {
 import { cn } from '@/lib/utils'
 
 const roleColors: Record<string, string> = {
-  'Super Admin': 'bg-cyan text-black',
+  'Super Admin': 'bg-purple text-white',
   'Local Admin': 'bg-green text-black',
   'Auditor': 'bg-orange text-black',
   'Viewer': 'bg-muted-foreground text-black',
@@ -36,7 +36,7 @@ export function AppHeader() {
       <div className="flex items-center gap-4">
         <DropdownMenu>
           <DropdownMenuTrigger className="flex items-center gap-2 rounded-full bg-secondary px-4 py-2 text-sm font-medium hover:bg-secondary/80 transition-colors">
-            <MapPin className="h-4 w-4 text-cyan" />
+            <MapPin className="h-4 w-4 text-purple" />
             <span>{selectedLocation}</span>
             <ChevronDown className="h-4 w-4 text-muted-foreground" />
           </DropdownMenuTrigger>
@@ -56,7 +56,7 @@ export function AppHeader() {
         </DropdownMenu>
 
         <span className="text-sm text-muted-foreground">
-          Viewing: <span className="text-cyan">{selectedLocation}</span>
+          Viewing: <span className="text-purple">{selectedLocation}</span>
         </span>
       </div>
 
@@ -69,7 +69,7 @@ export function AppHeader() {
             placeholder="Search hosts, issues, rules..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-lg border border-border bg-secondary py-2 pl-10 pr-4 text-sm placeholder:text-muted-foreground focus:border-cyan focus:outline-none focus:ring-1 focus:ring-cyan"
+            className="w-full rounded-lg border border-border bg-secondary py-2 pl-10 pr-4 text-sm placeholder:text-muted-foreground focus:border-purple focus:outline-none focus:ring-1 focus:ring-purple"
           />
         </div>
       </div>
