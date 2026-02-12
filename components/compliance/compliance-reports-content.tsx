@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Download, TrendingUp } from 'lucide-react'
 import { useApp } from '@/lib/app-context'
+import { useToast } from '@/hooks/use-toast'
 import { complianceAnalytics } from '@/lib/data'
 import { PDFExporter, type PDFReportData } from '@/lib/pdf-exporter'
 import {
@@ -41,11 +42,16 @@ const categoryData = [
 
 export function ComplianceReportsContent() {
   const { selectedLocation, hasPermission } = useApp()
+  const { toast } = useToast()
   const [activeTab, setActiveTab] = useState('overall')
 
   const handleExportPDF = () => {
     if (!hasPermission('canExport')) {
-      alert('You do not have permission to export reports')
+      toast({
+        title: 'Permission Denied',
+        description: 'You do not have permission to export reports.',
+        variant: 'destructive',
+      })
       return
     }
 
@@ -217,14 +223,6 @@ export function ComplianceReportsContent() {
                           <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
                       </Pie>
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: '#111118',
-                          border: '1px solid #2a2a3a',
-                          borderRadius: '8px',
-                          color: '#ffffff',
-                        }}
-                      />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
@@ -256,14 +254,6 @@ export function ComplianceReportsContent() {
                       <CartesianGrid strokeDasharray="3 3" stroke="#2a2a3a" />
                       <XAxis dataKey="severity" stroke="#888899" />
                       <YAxis stroke="#888899" />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: '#111118',
-                          border: '1px solid #2a2a3a',
-                          borderRadius: '8px',
-                          color: '#ffffff',
-                        }}
-                      />
                       <Legend />
                       <Bar dataKey="passed" name="Passed" fill="#22c55e" />
                       <Bar dataKey="failed" name="Failed" fill="#ef4444" />

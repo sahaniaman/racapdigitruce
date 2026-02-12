@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Search, Filter, Eye, FileText, RefreshCw } from 'lucide-react'
 import { hosts, type Host } from '@/lib/data'
 import { useApp } from '@/lib/app-context'
+import { useToast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
 import {
   Select,
@@ -28,21 +29,38 @@ const scoreRanges = ['All Scores', '90-100%', '70-89%', '50-69%', 'Below 50%']
 export function HostsContent() {
   const router = useRouter()
   const { hasPermission, selectedLocation } = useApp()
+  const { toast } = useToast()
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedOS, setSelectedOS] = useState('All Operating Systems')
   const [selectedScore, setSelectedScore] = useState('All Scores')
   const [selectedHosts, setSelectedHosts] = useState<string[]>([])
+  const [refreshingHosts, setRefreshingHosts] = useState<Record<string, boolean>>({})
 
   const handleViewHost = (hostId: string) => {
     router.push(`/hosts/${hostId}`)
   }
 
-  const handleRescan = (hostId: string) => {
+  const handleRescan = async (hostId: string, hostname: string) => {
     if (!hasPermission('canRescan')) {
-      alert('You do not have permission to rescan hosts')
+      toast({
+        title: 'Permission Denied',
+        description: 'You do not have permission to initiate host rescans.',
+        variant: 'destructive',
+      })
       return
     }
-    alert(`Rescanning host ${hostId}...`)
+    
+    setRefreshingHosts({ ...refreshingHosts, [hostId]: true })
+    
+    // Simulate rescan
+    await new Promise(resolve => setTimeout(resolve, 2000))
+    
+    setRefreshingHosts({ ...refreshingHosts, [hostId]: false })
+    
+    toast({
+      title: 'Rescan Complete',
+      description: `Successfully rescanned ${hostname}. Latest compliance data is now available.`,
+    })
   }
 
   const filteredHosts = useMemo(() => {

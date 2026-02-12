@@ -130,11 +130,12 @@ export const complianceRules: ComplianceRule[] = [
   { id: '8', ruleId: 'ISO-9.4', framework: 'ISO', description: 'System access control not properly configured', severity: 'high', locations: { DEL: false, MUM: true, BLR: true, HYD: true } },
 ]
 
+// Generate reports based on hosts data
 export const reports: Report[] = [
-  { id: '1', name: 'Weekly Compliance Report - Nov 10', date: '10/11/2025', hosts: 128, status: 'Completed' },
-  { id: '2', name: 'Critical Issues Report', date: '15/11/2025', hosts: 38, status: 'Completed' },
-  { id: '3', name: 'Monthly Security Audit', date: '01/11/2025', hosts: 128, status: 'Completed' },
-  { id: '4', name: 'Quarterly Compliance Summary', date: '01/10/2025', hosts: 120, status: 'Completed' },
+  { id: '1', name: 'Weekly Compliance Report - Nov 10', date: '10/11/2025', hosts: hosts.length, status: 'Completed' },
+  { id: '2', name: 'Critical Issues Report', date: '15/11/2025', hosts: hosts.filter(h => h.criticalFailed !== null).length, status: 'Completed' },
+  { id: '3', name: 'Monthly Security Audit', date: '01/11/2025', hosts: hosts.length, status: 'Completed' },
+  { id: '4', name: 'Quarterly Compliance Summary', date: '01/10/2025', hosts: Math.round(hosts.length * 0.95), status: 'Completed' },
 ]
 
 export const issues: Issue[] = [
@@ -146,39 +147,82 @@ export const issues: Issue[] = [
   { id: '6', ruleId: 'HIPAA-164.312', severity: 'medium', description: 'Encryption at rest not configured', hostsAffected: 6, framework: 'HIPAA', status: 'In Progress', firstDetected: '2025-11-11' },
 ]
 
-export const dashboardMetrics: DashboardMetrics = {
-  overallCompliance: 82,
-  complianceChange: 3,
-  hostsScanned: 128,
-  criticalFailures: 7,
-  criticalFailuresChange: -15,
-  avgScore: 79,
-  avgScoreChange: 2,
-  securityEvents: 1247,
-  dataProtected: '2.4 TB',
-  avgResponseTime: '12 min',
-  responseTimeChange: -8,
-  networkUptime: '99.98%',
+// Calculate dashboard metrics from actual data
+const calculateDashboardMetrics = (): DashboardMetrics => {
+  // Calculate overall compliance from hosts
+  const totalHosts = hosts.length
+  const totalScore = hosts.reduce((sum, host) => sum + host.score, 0)
+  const overallCompliance = Math.round(totalScore / totalHosts)
+  
+  // Count hosts scanned (all active hosts)
+  const hostsScanned = totalHosts
+  
+  // Count critical failures
+  const criticalFailures = hosts.filter(h => h.criticalFailed !== null).reduce((sum, h) => sum + (h.criticalFailed || 0), 0)
+  
+  // Calculate average score
+  const avgScore = Math.round(totalScore / totalHosts)
+  
+  // Count security events from issues
+  const securityEvents = issues.reduce((sum, issue) => sum + issue.hostsAffected, 0) * 15 // multiply by avg events per issue
+  
+  // Calculate data protected (assets count)
+  const dataProtected = `${(assets.length * 0.3).toFixed(1)} TB`
+  
+  return {
+    overallCompliance,
+    complianceChange: 3,
+    hostsScanned,
+    criticalFailures,
+    criticalFailuresChange: -15,
+    avgScore,
+    avgScoreChange: 2,
+    securityEvents,
+    dataProtected,
+    avgResponseTime: '12 min',
+    responseTimeChange: -8,
+    networkUptime: '99.98%',
+  }
 }
 
-export const complianceTrend: ComplianceTrendPoint[] = [
-  { date: 'Nov 7', score: 75 },
-  { date: 'Nov 8', score: 78 },
-  { date: 'Nov 9', score: 76 },
-  { date: 'Nov 10', score: 80 },
-  { date: 'Nov 11', score: 79 },
-  { date: 'Nov 12', score: 81 },
-  { date: 'Nov 13', score: 83 },
-  { date: 'Nov 14', score: 82 },
-  { date: 'Nov 15', score: 84 },
-  { date: 'Nov 16', score: 82 },
-]
+export const dashboardMetrics: DashboardMetrics = calculateDashboardMetrics()
 
-export const topFailedControls: TopFailedControl[] = [
-  { ruleId: 'CIS-1.3', severity: 'critical', description: 'Ensure automatic updates are enabled', hostsAffected: 23 },
-  { ruleId: 'ISO-5.3', severity: 'high', description: 'Password complexity requirements not met', hostsAffected: 18 },
-  { ruleId: 'NIST-AC-2', severity: 'high', description: 'User account monitoring disabled', hostsAffected: 15 },
-]
+// Generate compliance trend leading to current score
+const generateComplianceTrend = (): ComplianceTrendPoint[] => {
+  const currentScore = dashboardMetrics.overallCompliance
+  const days = 10
+  const trend: ComplianceTrendPoint[] = []
+  
+  for (let i = 0; i < days; i++) {
+    const date = new Date(2025, 10, 7 + i) // Nov 7 onwards
+    const progress = i / (days - 1)
+    // Score progresses from 75 to current score with some variance
+    const baseScore = 75 + (currentScore - 75) * progress
+    const variance = Math.sin(i * 0.5) * 2
+    const score = Math.round(baseScore + variance)
+    
+    trend.push({
+      date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      score: Math.min(100, Math.max(60, score))
+    })
+  }
+  
+  return trend
+}
+
+export const complianceTrend: ComplianceTrendPoint[] = generateComplianceTrend()
+
+// Calculate top failed controls from issues
+export const topFailedControls: TopFailedControl[] = issues
+  .filter(issue => issue.status === 'Open' || issue.status === 'In Progress')
+  .sort((a, b) => b.hostsAffected - a.hostsAffected)
+  .slice(0, 3)
+  .map(issue => ({
+    ruleId: issue.ruleId,
+    severity: issue.severity as 'critical' | 'high' | 'medium',
+    description: issue.description,
+    hostsAffected: issue.hostsAffected
+  }))
 
 export const locations = ['All Locations', 'DEL', 'MUM', 'BLR', 'HYD'] as const
 export type Location = (typeof locations)[number]
@@ -272,14 +316,17 @@ export const hostDetails: Record<string, HostDetail> = {
   },
 }
 
-// Extended compliance trend data for 30 days
+// Extended compliance trend data for 30 days leading to current score
 export const complianceTrend30Days: ComplianceTrendPoint[] = Array.from({ length: 31 }, (_, i) => {
   const date = new Date(2026, 0, 4 + i)
-  const baseScore = 77
-  const variance = Math.sin(i * 0.3) * 5 + Math.random() * 3
+  const currentScore = dashboardMetrics.overallCompliance
+  const startScore = currentScore - 10 // Started 10 points lower
+  const progress = i / 30
+  const baseScore = startScore + (currentScore - startScore) * progress
+  const variance = Math.sin(i * 0.3) * 3 + Math.random() * 2
   return {
     date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-    score: Math.min(100, Math.max(60, Math.round(baseScore + variance + i * 0.3))),
+    score: Math.min(100, Math.max(60, Math.round(baseScore + variance))),
   }
 })
 
@@ -303,22 +350,60 @@ export interface ComplianceAnalytics {
   }[]
 }
 
-export const complianceAnalytics: ComplianceAnalytics = {
-  systemCompliance: 78.5,
-  complianceChange: 2.3,
-  totalEndpoints: 245,
-  totalPolicies: 128,
-  totalControls: 856,
-  statusDistribution: {
-    compliant: 78.5,
-    nonCompliant: 10.9,
-    notApplicable: 6.4,
-    unknown: 4.1,
-  },
-  severityData: [
-    { severity: 'Critical', passed: 156, failed: 32 },
-    { severity: 'High', passed: 189, failed: 67 },
-    { severity: 'Medium', passed: 298, failed: 45 },
-    { severity: 'Low', passed: 156, failed: 23 },
-  ],
+// Calculate compliance analytics from actual data
+const calculateComplianceAnalytics = (): ComplianceAnalytics => {
+  // Calculate from hosts
+  const totalEndpoints = hosts.length
+  const compliantHosts = hosts.filter(h => h.score >= 80).length
+  const nonCompliantHosts = hosts.filter(h => h.score < 80 && h.score >= 50).length
+  const criticalHosts = hosts.filter(h => h.score < 50).length
+  
+  const systemCompliance = (compliantHosts / totalEndpoints) * 100
+  
+  // Calculate severity data from issues and hosts
+  const criticalIssues = issues.filter(i => i.severity === 'critical')
+  const highIssues = issues.filter(i => i.severity === 'high')
+  const mediumIssues = issues.filter(i => i.severity === 'medium')
+  const lowIssues = issues.filter(i => i.severity === 'low')
+  
+  const totalPolicies = complianceRules.length * 16 // Rules across frameworks
+  const totalControls = totalPolicies * 7 // Controls per policy
+  
+  return {
+    systemCompliance: Math.round(systemCompliance * 10) / 10,
+    complianceChange: 2.3,
+    totalEndpoints,
+    totalPolicies,
+    totalControls,
+    statusDistribution: {
+      compliant: Math.round(systemCompliance * 10) / 10,
+      nonCompliant: Math.round((nonCompliantHosts / totalEndpoints) * 1000) / 10,
+      notApplicable: Math.round((criticalHosts / totalEndpoints) * 1000) / 10,
+      unknown: Math.round((1 - compliantHosts / totalEndpoints - nonCompliantHosts / totalEndpoints - criticalHosts / totalEndpoints) * 1000) / 10,
+    },
+    severityData: [
+      { 
+        severity: 'Critical', 
+        passed: Math.round((totalEndpoints - criticalIssues.reduce((sum, i) => sum + i.hostsAffected, 0)) * 1.2),
+        failed: criticalIssues.reduce((sum, i) => sum + i.hostsAffected, 0)
+      },
+      { 
+        severity: 'High', 
+        passed: Math.round((totalEndpoints - highIssues.reduce((sum, i) => sum + i.hostsAffected, 0)) * 1.5),
+        failed: highIssues.reduce((sum, i) => sum + i.hostsAffected, 0)
+      },
+      { 
+        severity: 'Medium', 
+        passed: Math.round((totalEndpoints - mediumIssues.reduce((sum, i) => sum + i.hostsAffected, 0)) * 2.3),
+        failed: mediumIssues.reduce((sum, i) => sum + i.hostsAffected, 0) || 12
+      },
+      { 
+        severity: 'Low', 
+        passed: Math.round((totalEndpoints - lowIssues.reduce((sum, i) => sum + i.hostsAffected, 0)) * 1.8),
+        failed: lowIssues.reduce((sum, i) => sum + i.hostsAffected, 0) || 8
+      },
+    ],
+  }
 }
+
+export const complianceAnalytics: ComplianceAnalytics = calculateComplianceAnalytics()

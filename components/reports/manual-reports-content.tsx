@@ -14,8 +14,9 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
-import { Upload, FileText, Download, Trash2, Plus, Calendar } from 'lucide-react'
+import { Upload, FileText, Download, Trash2, Plus, Calendar, AlertCircle } from 'lucide-react'
 import { useApp } from '@/lib/app-context'
+import { useToast } from '@/hooks/use-toast'
 
 interface ManualReport {
   id: string
@@ -67,25 +68,40 @@ const initialReports: ManualReport[] = [
 ]
 
 export function ManualReportsContent() {
-  const { currentUser, hasPermission, selectedLocation } = useApp()
+  const { toast } = useToast()
+  const { currentUser, selectedLocation, hasPermission } = useApp()
   const [reports, setReports] = useState<ManualReport[]>(initialReports)
   const [showUploadForm, setShowUploadForm] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
   const [newReport, setNewReport] = useState({
     title: '',
     type: '',
     description: '',
   })
 
-  const handleUpload = () => {
+  const handleUpload = async () => {
     if (!hasPermission('canGenerateReports')) {
-      alert('You do not have permission to upload reports')
+      toast({
+        title: 'Permission Denied',
+        description: 'You do not have permission to upload reports. Please contact your administrator for access.',
+        variant: 'destructive',
+      })
       return
     }
 
     if (!newReport.title || !newReport.type) {
-      alert('Please fill in all required fields')
+      toast({
+        title: 'Incomplete Form',
+        description: 'Please fill in all required fields before uploading.',
+        variant: 'destructive',
+      })
       return
     }
+
+    setIsUploading(true)
+    
+    // Simulate upload process
+    await new Promise(resolve => setTimeout(resolve, 1500))
 
     const report: ManualReport = {
       id: String(reports.length + 1),
@@ -100,25 +116,47 @@ export function ManualReportsContent() {
     setReports([report, ...reports])
     setNewReport({ title: '', type: '', description: '' })
     setShowUploadForm(false)
+    setIsUploading(false)
+    
+    toast({
+      title: 'Report Uploaded Successfully',
+      description: `${newReport.title} has been uploaded and is now available for review.`,
+    })
   }
 
   const handleDelete = (id: string) => {
     if (!hasPermission('canDelete')) {
-      alert('You do not have permission to delete reports')
+      toast({
+        title: 'Permission Denied',
+        description: 'You do not have permission to delete reports. Contact your administrator.',
+        variant: 'destructive',
+      })
       return
     }
 
-    if (confirm('Are you sure you want to delete this report?')) {
-      setReports(reports.filter((r) => r.id !== id))
-    }
+    const report = reports.find((r) => r.id === id)
+    setReports(reports.filter((r) => r.id !== id))
+    
+    toast({
+      title: 'Report Deleted',
+      description: report ? `${report.title} has been successfully removed.` : 'Report has been deleted.',
+    })
   }
 
   const handleDownload = (report: ManualReport) => {
     if (!hasPermission('canExport')) {
-      alert('You do not have permission to download reports')
+      toast({
+        title: 'Permission Denied',
+        description: 'You do not have permission to download reports.',
+        variant: 'destructive',
+      })
       return
     }
-    alert(`Downloading: ${report.title}`)
+    toast({
+      title: 'Download Started',
+      description: `Downloading ${report.title}...`,
+    })
+    // Actual download logic would go here
   }
 
   return (
@@ -228,8 +266,16 @@ export function ManualReportsContent() {
               <Button
                 className="bg-purple text-white hover:bg-purple/90"
                 onClick={handleUpload}
+                disabled={isUploading}
               >
-                Upload Report
+                {isUploading ? (
+                  <>
+                    <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
+                    Uploading...
+                  </>
+                ) : (
+                  'Upload Report'
+                )}
               </Button>
             </div>
           </CardContent>

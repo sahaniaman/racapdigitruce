@@ -16,6 +16,19 @@ import {
 import { Checkbox } from '@/components/ui/checkbox'
 import { Card, CardContent } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+  Cell,
+  PieChart,
+  Pie,
+} from 'recharts'
 
 // Sample historical compliance data for comparison
 const historicalData: Record<string, {
@@ -651,6 +664,76 @@ export function ReportsContent() {
                          comparisonResult.overallTrend === 'worsening' ? '↓ Compliance Declining' : '→ Compliance Stable'}
                       </span>
                     </div>
+
+                    {/* Comparison Pie Charts */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <h4 className="text-center text-sm font-medium text-muted-foreground mb-3">Previous ({comparisonResult.previousDate})</h4>
+                        <div className="h-[250px]">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                              <Pie
+                                data={[
+                                  { name: 'Compliant', value: comparisonResult.previousCompliance },
+                                  { name: 'Non-Compliant', value: 100 - comparisonResult.previousCompliance }
+                                ]}
+                                cx="50%"
+                                cy="50%"
+                                innerRadius={60}
+                                outerRadius={90}
+                                dataKey="value"
+                                label={({ value }) => `${value.toFixed(1)}%`}
+                              >
+                                <Cell fill="#A192D9" />
+                                <Cell fill="#ef4444" />
+                              </Pie>
+                              <Tooltip
+                                contentStyle={{
+                                  backgroundColor: '#111118',
+                                  border: '1px solid #2a2a3a',
+                                  borderRadius: '8px',
+                                  color: '#ffffff',
+                                }}
+                                formatter={(value) => `${Number(value).toFixed(1)}%`}
+                              />
+                            </PieChart>
+                          </ResponsiveContainer>
+                        </div>
+                      </div>
+                      <div>
+                        <h4 className="text-center text-sm font-medium text-muted-foreground mb-3">Current ({comparisonResult.currentDate})</h4>
+                        <div className="h-[250px]">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                              <Pie
+                                data={[
+                                  { name: 'Compliant', value: comparisonResult.currentCompliance },
+                                  { name: 'Non-Compliant', value: 100 - comparisonResult.currentCompliance }
+                                ]}
+                                cx="50%"
+                                cy="50%"
+                                innerRadius={60}
+                                outerRadius={90}
+                                dataKey="value"
+                                label={({ value }) => `${value.toFixed(1)}%`}
+                              >
+                                <Cell fill="#6D50E9" />
+                                <Cell fill="#ef4444" />
+                              </Pie>
+                              <Tooltip
+                                contentStyle={{
+                                  backgroundColor: '#111118',
+                                  border: '1px solid #2a2a3a',
+                                  borderRadius: '8px',
+                                  color: '#ffffff',
+                                }}
+                                formatter={(value) => `${Number(value).toFixed(1)}%`}
+                              />
+                            </PieChart>
+                          </ResponsiveContainer>
+                        </div>
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
 
@@ -658,38 +741,58 @@ export function ReportsContent() {
                 <Card className="bg-card border-border">
                   <CardContent className="p-6">
                     <h3 className="text-lg font-semibold text-foreground mb-4">Severity Comparison</h3>
-                    <div className="overflow-x-auto">
-                      <table className="w-full">
-                        <thead>
-                          <tr className="border-b border-border">
-                            <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Severity</th>
-                            <th className="text-center py-3 px-4 text-sm font-medium text-muted-foreground">Previous</th>
-                            <th className="text-center py-3 px-4 text-sm font-medium text-muted-foreground">Current</th>
-                            <th className="text-center py-3 px-4 text-sm font-medium text-muted-foreground">Change</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {comparisonResult.severityChanges.map((item) => (
-                            <tr key={item.severity} className="border-b border-border/50">
-                              <td className="py-3 px-4 text-sm font-medium text-foreground">{item.severity}</td>
-                              <td className="py-3 px-4 text-sm text-center text-muted-foreground">{item.previousCompliance}%</td>
-                              <td className="py-3 px-4 text-sm text-center text-foreground">{item.currentCompliance}%</td>
-                              <td className="py-3 px-4 text-sm text-center">
-                                <span className={cn(
-                                  'flex items-center justify-center gap-1',
-                                  item.trend === 'up' ? 'text-green' :
-                                  item.trend === 'down' ? 'text-red' : 'text-orange'
-                                )}>
-                                  {item.trend === 'up' ? <TrendingUp className="h-4 w-4" /> :
-                                   item.trend === 'down' ? <TrendingDown className="h-4 w-4" /> :
-                                   <ArrowRight className="h-4 w-4" />}
-                                  {Number(item.change) > 0 ? '+' : ''}{item.change}%
-                                </span>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                    <div className="h-[400px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart 
+                          data={comparisonResult.severityChanges.map(item => ({
+                            severity: item.severity,
+                            Previous: Number(item.previousCompliance),
+                            Current: Number(item.currentCompliance),
+                          }))}
+                          margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" stroke="#2a2a3a" />
+                          <XAxis dataKey="severity" stroke="#888899" />
+                          <YAxis stroke="#888899" label={{ value: 'Compliance %', angle: -90, position: 'insideLeft' }} />
+                          <Tooltip
+                            contentStyle={{
+                              backgroundColor: '#111118',
+                              border: '1px solid #2a2a3a',
+                              borderRadius: '8px',
+                              color: '#ffffff',
+                            }}
+                            formatter={(value) => `${value}%`}
+                          />
+                          <Legend />
+                          <Bar dataKey="Previous" fill="#A192D9" radius={[4, 4, 0, 0]} />
+                          <Bar dataKey="Current" fill="#6D50E9" radius={[4, 4, 0, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                    
+                    {/* Trend Summary */}
+                    <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3">
+                      {comparisonResult.severityChanges.map((item) => (
+                        <div key={item.severity} className="p-3 rounded-lg bg-secondary/50 text-center">
+                          <p className="text-xs text-muted-foreground mb-1">{item.severity}</p>
+                          <div className="flex items-center justify-center gap-1">
+                            {item.trend === 'up' ? (
+                              <TrendingUp className="h-3 w-3 text-green" />
+                            ) : item.trend === 'down' ? (
+                              <TrendingDown className="h-3 w-3 text-red" />
+                            ) : (
+                              <ArrowRight className="h-3 w-3 text-orange" />
+                            )}
+                            <span className={cn(
+                              'text-sm font-medium',
+                              item.trend === 'up' ? 'text-green' :
+                              item.trend === 'down' ? 'text-red' : 'text-orange'
+                            )}>
+                              {Number(item.change) > 0 ? '+' : ''}{item.change}%
+                            </span>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </CardContent>
                 </Card>
@@ -698,38 +801,64 @@ export function ReportsContent() {
                 <Card className="bg-card border-border">
                   <CardContent className="p-6">
                     <h3 className="text-lg font-semibold text-foreground mb-4">Category Comparison</h3>
-                    <div className="overflow-x-auto">
-                      <table className="w-full">
-                        <thead>
-                          <tr className="border-b border-border">
-                            <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Category</th>
-                            <th className="text-center py-3 px-4 text-sm font-medium text-muted-foreground">Previous</th>
-                            <th className="text-center py-3 px-4 text-sm font-medium text-muted-foreground">Current</th>
-                            <th className="text-center py-3 px-4 text-sm font-medium text-muted-foreground">Change</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {comparisonResult.categoryChanges.map((item) => (
-                            <tr key={item.category} className="border-b border-border/50">
-                              <td className="py-3 px-4 text-sm font-medium text-foreground">{item.category}</td>
-                              <td className="py-3 px-4 text-sm text-center text-muted-foreground">{item.previousCompliance}%</td>
-                              <td className="py-3 px-4 text-sm text-center text-foreground">{item.currentCompliance}%</td>
-                              <td className="py-3 px-4 text-sm text-center">
-                                <span className={cn(
-                                  'flex items-center justify-center gap-1',
-                                  item.trend === 'up' ? 'text-green' :
-                                  item.trend === 'down' ? 'text-red' : 'text-orange'
-                                )}>
-                                  {item.trend === 'up' ? <TrendingUp className="h-4 w-4" /> :
-                                   item.trend === 'down' ? <TrendingDown className="h-4 w-4" /> :
-                                   <ArrowRight className="h-4 w-4" />}
-                                  {Number(item.change) > 0 ? '+' : ''}{item.change}%
-                                </span>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                    <div className="h-[400px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart 
+                          data={comparisonResult.categoryChanges.map(item => ({
+                            category: item.category,
+                            Previous: Number(item.previousCompliance),
+                            Current: Number(item.currentCompliance),
+                          }))}
+                          margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" stroke="#2a2a3a" />
+                          <XAxis 
+                            dataKey="category" 
+                            stroke="#888899" 
+                            angle={-45}
+                            textAnchor="end"
+                            height={100}
+                          />
+                          <YAxis stroke="#888899" label={{ value: 'Compliance %', angle: -90, position: 'insideLeft' }} />
+                          <Tooltip
+                            contentStyle={{
+                              backgroundColor: '#111118',
+                              border: '1px solid #2a2a3a',
+                              borderRadius: '8px',
+                              color: '#ffffff',
+                            }}
+                            formatter={(value) => `${value}%`}
+                          />
+                          <Legend />
+                          <Bar dataKey="Previous" fill="#A192D9" radius={[4, 4, 0, 0]} />
+                          <Bar dataKey="Current" fill="#6D50E9" radius={[4, 4, 0, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                    
+                    {/* Trend Summary */}
+                    <div className="mt-6 grid grid-cols-2 md:grid-cols-3 gap-3">
+                      {comparisonResult.categoryChanges.map((item) => (
+                        <div key={item.category} className="p-3 rounded-lg bg-secondary/50">
+                          <p className="text-xs text-muted-foreground mb-1">{item.category}</p>
+                          <div className="flex items-center gap-1">
+                            {item.trend === 'up' ? (
+                              <TrendingUp className="h-3 w-3 text-green" />
+                            ) : item.trend === 'down' ? (
+                              <TrendingDown className="h-3 w-3 text-red" />
+                            ) : (
+                              <ArrowRight className="h-3 w-3 text-orange" />
+                            )}
+                            <span className={cn(
+                              'text-sm font-medium',
+                              item.trend === 'up' ? 'text-green' :
+                              item.trend === 'down' ? 'text-red' : 'text-orange'
+                            )}>
+                              {Number(item.change) > 0 ? '+' : ''}{item.change}%
+                            </span>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </CardContent>
                 </Card>

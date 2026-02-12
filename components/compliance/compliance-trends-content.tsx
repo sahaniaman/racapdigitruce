@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/select'
 import { Download, Filter, TrendingUp } from 'lucide-react'
 import { useApp } from '@/lib/app-context'
+import { useToast } from '@/hooks/use-toast'
 import { complianceTrend30Days } from '@/lib/data'
 import {
   LineChart,
@@ -25,6 +26,7 @@ import {
 
 export function ComplianceTrendsContent() {
   const { selectedLocation, hasPermission } = useApp()
+  const { toast } = useToast()
   const [timeRange, setTimeRange] = useState('30')
   const [framework, setFramework] = useState('all')
 
@@ -34,7 +36,11 @@ export function ComplianceTrendsContent() {
 
   const handleExport = () => {
     if (!hasPermission('canExport')) {
-      alert('You do not have permission to export data')
+      toast({
+        title: 'Permission Denied',
+        description: 'You do not have permission to export compliance trend data.',
+        variant: 'destructive',
+      })
       return
     }
     // Generate CSV
@@ -47,6 +53,11 @@ export function ComplianceTrendsContent() {
     a.href = url
     a.download = 'compliance-trends.csv'
     a.click()
+    
+    toast({
+      title: 'Export Successful',
+      description: 'Compliance trend data has been exported to CSV format.',
+    })
   }
 
   return (

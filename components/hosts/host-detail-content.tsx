@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/collapsible'
 import { Download, RefreshCw, ChevronDown, ArrowLeft } from 'lucide-react'
 import { useApp } from '@/lib/app-context'
+import { useToast } from '@/hooks/use-toast'
 import { hostDetails, hosts } from '@/lib/data'
 
 interface HostDetailContentProps {
@@ -21,8 +22,10 @@ interface HostDetailContentProps {
 export function HostDetailContent({ hostId }: HostDetailContentProps) {
   const router = useRouter()
   const { hasPermission } = useApp()
+  const { toast } = useToast()
   const [rawPayloadOpen, setRawPayloadOpen] = useState(false)
   const [isRescanning, setIsRescanning] = useState(false)
+  const [isExporting, setIsExporting] = useState(false)
 
   // Get host details or create from basic host data
   const hostDetail = hostDetails[hostId]
@@ -84,11 +87,18 @@ export function HostDetailContent({ hostId }: HostDetailContentProps) {
     return colors[severity as keyof typeof colors] || 'bg-muted'
   }
 
-  const handleExport = () => {
+  const handleExport = async () => {
     if (!hasPermission('canExport')) {
-      alert('You do not have permission to export data')
+      toast({
+        title: 'Permission Denied',
+        description: 'You do not have permission to export host data.',
+        variant: 'destructive',
+      })
       return
     }
+    
+    setIsExporting(true)
+    
     const data = JSON.stringify(host, null, 2)
     const blob = new Blob([data], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
@@ -96,18 +106,33 @@ export function HostDetailContent({ hostId }: HostDetailContentProps) {
     a.href = url
     a.download = `${host.hostname}-report.json`
     a.click()
+    
+    setIsExporting(false)
+    
+    toast({
+      title: 'Export Complete',
+      description: `Host details for ${host.hostname} have been exported successfully.`,
+    })
   }
 
   const handleRescan = async () => {
     if (!hasPermission('canRescan')) {
-      alert('You do not have permission to rescan hosts')
+      toast({
+        title: 'Permission Denied',
+        description: 'You do not have permission to initiate rescans.',
+        variant: 'destructive',
+      })
       return
     }
     setIsRescanning(true)
     // Simulate rescan
     await new Promise((resolve) => setTimeout(resolve, 2000))
     setIsRescanning(false)
-    alert('Rescan completed successfully')
+    
+    toast({
+      title: 'Rescan Complete',
+      description: `${host.hostname} has been rescanned. Updated compliance data is now available.`,
+    })
   }
 
   return (
