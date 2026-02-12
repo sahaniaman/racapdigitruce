@@ -215,7 +215,7 @@ export function HostsContent() {
                   isSelected={selectedHosts.includes(host.id)}
                   onToggleSelect={() => toggleHostSelection(host.id)}
                   onView={() => handleViewHost(host.id)}
-                  onRescan={() => handleRescan(host.id)}
+                  onRescan={() => handleRescan(host.id, host.hostname)}
                   canRescan={hasPermission('canRescan')}
                 />
               ))}
