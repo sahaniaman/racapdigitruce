@@ -62,7 +62,7 @@ const renderCustomLabel = ({
 
 // Chart data for each metric - calculated from actual data
 const complianceHistoryData = complianceTrend.map((point, i) => ({
-  month: point.date.split(' ')[0],
+  month: point.date, // Full date like "Feb 3"
   compliance: point.score
 })).slice(-7) // Last 7 days
 
@@ -285,7 +285,7 @@ export function DashboardContent() {
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#2a2a3a" />
                 <XAxis dataKey="month" stroke="#ffffff" tick={{ fill: '#ffffff' }} />
-                <YAxis stroke="#ffffff" tick={{ fill: '#ffffff' }} domain={[70, 85]} />
+                <YAxis stroke="#ffffff" tick={{ fill: '#ffffff' }} domain={[68, 76]} />
                 <Area 
                   type="monotone" 
                   dataKey="compliance" 

@@ -105,7 +105,7 @@ export const hosts: Host[] = [
   { id: '5', hostname: 'prod-cache-01.corp.local', os: 'Debian 11', lastSeen: 'Nov 17, 02:50 PM', score: 95, criticalFailed: null },
   { id: '6', hostname: 'prod-api-gateway.corp.local', os: 'Ubuntu 22.04 LTS', lastSeen: 'Nov 17, 02:35 PM', score: 78, criticalFailed: 1 },
   { id: '7', hostname: 'stage-web-01.corp.local', os: 'Windows Server 2019', lastSeen: 'Nov 17, 01:00 PM', score: 52, criticalFailed: 4 },
-  { id: '8', hostname: 'prod-mail-server.corp.local', os: 'CentOS 7', lastSeen: 'Nov 17, 02:30 PM', score: 71, criticalFailed: 2 },
+  { id: '8', hostname: 'prod-mail-server.corp.local', os: 'CentOS 7', lastSeen: 'Nov 17, 02:30 PM', score: 75, criticalFailed: 2 },
 ]
 
 export const assets: Asset[] = [
@@ -194,11 +194,11 @@ const generateComplianceTrend = (): ComplianceTrendPoint[] => {
   const trend: ComplianceTrendPoint[] = []
   
   for (let i = 0; i < days; i++) {
-    const date = new Date(2025, 10, 7 + i) // Nov 7 onwards
+    const date = new Date(2026, 1, 3 + i) // Feb 3-12, 2026
     const progress = i / (days - 1)
-    // Score progresses from 75 to current score with some variance
-    const baseScore = 75 + (currentScore - 75) * progress
-    const variance = Math.sin(i * 0.5) * 2
+    // Score progresses from 70 to current score with some variance
+    const baseScore = 70 + (currentScore - 70) * progress
+    const variance = Math.sin(i * 0.5) * 1.5
     const score = Math.round(baseScore + variance)
     
     trend.push({
@@ -318,7 +318,7 @@ export const hostDetails: Record<string, HostDetail> = {
 
 // Extended compliance trend data for 30 days leading to current score
 export const complianceTrend30Days: ComplianceTrendPoint[] = Array.from({ length: 31 }, (_, i) => {
-  const date = new Date(2026, 0, 4 + i)
+  const date = new Date(2026, 0, 13 + i) // Jan 13 - Feb 12, 2026
   const currentScore = dashboardMetrics.overallCompliance
   const startScore = currentScore - 10 // Started 10 points lower
   const progress = i / 30
